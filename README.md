@@ -2,7 +2,42 @@
 
 This repository contains a complete AI evaluations course built around a Recipe Chatbot. Through 5 progressive homework assignments, you'll learn practical techniques for evaluating and improving AI systems.
 
-## Quick Start
+## Quick start (conda)
+
+You will need to have conda and conda-project installed in your base environment.
+
+```bash
+conda install conda-project
+```
+
+1. **Clone and Setup env**
+   ```bash
+   git clone https://github.com/ai-evals-course/recipe-chatbot.git
+   cd recipe-chatbot
+   conda project install
+   ```
+
+2. **Configure environment**
+   You have three options to configure LLMs for this project.
+
+   * `env.example`: Requires and OpenAI API key to use OpenAI models
+   * `env.anaconda.example`: Requires an Anaconda.com account to use hosted OSS LLM inference
+   * `env.anaconda-ai.example`: Requires and Anaconda.com account and have downloaded AI Navigator for local OSS inference
+
+   Copy one of the example files above `.env` and follow instructions in the file to set API keys if needed.
+
+3. **Run the Chatbot**
+   ```bash
+   conda project run
+   ```
+
+4. **Run bulk tests**
+   ```bash
+   conda project run bulk-test
+   # Open http://127.0.0.1:8000
+   ```
+
+## Quick Start (original)
 
 1. **Clone & Setup**
    ```bash
