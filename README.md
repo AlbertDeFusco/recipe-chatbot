@@ -26,13 +26,23 @@ conda install conda-project
 
    Copy one of the example files above to the filename `.env` and follow instructions in the file to set API keys if needed.
 
-3. **Run the Chatbot**
+3. **Activate environment**
+   Use this command to activate the environment in your terminal to be able to run `python <script-py>` commands
+
+   ```bash
+   conda project activate
+   ```
+
+4. **Run the Chatbot**
+   To run the chatbot you need not have activated the environment from step 3
+
    ```bash
    conda project run
    # Open http://127.0.0.1:8000
    ```
 
-4. **Run bulk tests**
+5. **Run bulk tests**
+   To run bulk tests you need not have activated the environment from step 3
    ```bash
    conda project run bulk-test
    ```
