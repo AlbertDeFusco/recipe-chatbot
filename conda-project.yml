@@ -1,0 +1,16 @@
+name: recipe-chatbot
+
+environments:
+  default:
+    - environment.yml
+
+commands:
+  bulk-test:
+    cmd: python scripts/bulk_test.py
+
+variables:
+  MODEL_NAME: openai/gpt-4.1-mini
+  MODEL_NAME_JUDGE: openai/gpt-4.1-nano
+  OPENAI_BASE_URL: https://api.openai.com/v1
+  OPENAI_API_KEY:
+

@@ -1,0 +1,32 @@
+name:
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11
+  - anaconda-auth
+  - fastapi
+  - uvicorn
+  - python-dotenv
+  - httpx
+  - rich
+  - pandas
+  - numpy
+  - scikit-learn
+  - rank-bm25
+  - tqdm
+  - pydantic
+  - typing-extensions
+  - matplotlib
+  - seaborn
+  - plotly
+  - python-fasthtml
+  - pip
+  - pip:
+    - judgy
+    - monsterui
+    - litellm
+  - anaconda-ai
+variables:
+prefix:
+platforms:
