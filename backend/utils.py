@@ -7,9 +7,11 @@ wrapper around litellm so the rest of the application stays decluttered.
 """
 
 import os
+import json
 from typing import Final, List, Dict
 
 import litellm  # type: ignore
+import anaconda_ai.integrations.litellm
 from dotenv import load_dotenv
 
 # Ensure the .env file is loaded as early as possible.
@@ -29,7 +31,7 @@ SYSTEM_PROMPT: Final[str] = (
 
 # Fetch configuration *after* we loaded the .env file.
 MODEL_NAME: Final[str] = os.environ.get("MODEL_NAME", "gpt-4o-mini")
-
+MODEL_EXTRA_HEADERS: Final[str] = json.loads(os.environ.get("MODEL_EXTRA_HEADERS", "{}")) or None
 
 # --- Agent wrapper ---------------------------------------------------------------
 
@@ -59,6 +61,7 @@ def get_agent_response(messages: List[Dict[str, str]]) -> List[Dict[str, str]]: 
     completion = litellm.completion(
         model=MODEL_NAME,
         messages=current_messages, # Pass the full history
+        extra_headers=MODEL_EXTRA_HEADERS,
     )
 
     assistant_reply_content: str = (
