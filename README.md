@@ -29,12 +29,12 @@ conda install conda-project
 3. **Run the Chatbot**
    ```bash
    conda project run
+   # Open http://127.0.0.1:8000
    ```
 
 4. **Run bulk tests**
    ```bash
    conda project run bulk-test
-   # Open http://127.0.0.1:8000
    ```
 
 ## Quick Start (original)
