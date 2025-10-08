@@ -24,7 +24,7 @@ conda install conda-project
    * `env.anaconda.example`: Requires a free [Anaconda.com](https://anaconda.com/app) account to use hosted OSS LLM inference
    * `env.anaconda-ai.example`: Requires a free [Anaconda.com](https://anaconda.com/app) account and have downloaded [AI Navigator](https://www.anaconda.com/products/ai-navigator) for local OSS inference
 
-   Copy one of the example files above `.env` and follow instructions in the file to set API keys if needed.
+   Copy one of the example files above to the filename `.env` and follow instructions in the file to set API keys if needed.
 
 3. **Run the Chatbot**
    ```bash
