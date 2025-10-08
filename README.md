@@ -21,8 +21,8 @@ conda install conda-project
    You have three options to configure LLMs for this project.
 
    * `env.example`: Requires and OpenAI API key to use OpenAI models
-   * `env.anaconda.example`: Requires an Anaconda.com account to use hosted OSS LLM inference
-   * `env.anaconda-ai.example`: Requires and Anaconda.com account and have downloaded AI Navigator for local OSS inference
+   * `env.anaconda.example`: Requires a free [Anaconda.com](https://anaconda.com/app) account to use hosted OSS LLM inference
+   * `env.anaconda-ai.example`: Requires a free [Anaconda.com](https://anaconda.com/app) account and have downloaded [AI Navigator](https://www.anaconda.com/products/ai-navigator) for local OSS inference
 
    Copy one of the example files above `.env` and follow instructions in the file to set API keys if needed.
 
