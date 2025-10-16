@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Error Analysis - Open Coding</title>
+    <link rel="stylesheet" href="https://pyscript.net/snapshots/2024.9.2/core.css">
+    <script type="module" src="https://pyscript.net/snapshots/2024.9.2/core.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .file-upload {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .file-upload label {
+            display: block;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .file-upload input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px dashed #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload input[type="file"]:hover {
+            border-color: #764ba2;
+            background: #f8f9ff;
+        }
+
+        .view-toggle {
+            display: none;
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .view-toggle button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .view-toggle button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        #list-view {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        #list-view h2 {
+            padding: 1.5rem 2rem;
+            background: #f8f9ff;
+            border-bottom: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .row-item {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .row-item:hover {
+            background: #f8f9ff;
+            transform: translateX(5px);
+        }
+
+        .row-item:last-child {
+            border-bottom: none;
+        }
+
+        .row-id {
+            font-weight: bold;
+            color: #667eea;
+            min-width: 60px;
+            font-size: 1.1rem;
+        }
+
+        .row-query {
+            flex: 1;
+            color: #666;
+        }
+
+        #detail-view {
+            display: none;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            min-height: 600px;
+        }
+
+        .coding-panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .coding-panel h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .coding-panel textarea {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 400px;
+            transition: border-color 0.3s;
+        }
+
+        .coding-panel textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .coding-panel button {
+            margin-top: 1rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .coding-panel button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .trace-panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 2rem;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+
+        .query-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .query-section h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .query-text {
+            background: #f8f9ff;
+            padding: 1.5rem;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .response-section {
+            margin-top: 2rem;
+        }
+
+        .response-section h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .response-content {
+            padding: 1.5rem;
+            background: #fafafa;
+            border-radius: 6px;
+            line-height: 1.8;
+        }
+
+        .response-content h1, .response-content h2, .response-content h3 {
+            color: #333;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .response-content h1 {
+            font-size: 1.8rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        .response-content h2 {
+            font-size: 1.5rem;
+        }
+
+        .response-content h3 {
+            font-size: 1.2rem;
+        }
+
+        .response-content ul, .response-content ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .response-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .response-content p {
+            margin-bottom: 1rem;
+        }
+
+        .response-content code {
+            background: #f0f0f0;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .response-content pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        .response-content pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            #detail-view {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 AI Agent Error Analysis - Open Coding</h1>
+        <p>Analyze agent responses and assign descriptive labels to identify patterns and potential errors</p>
+    </div>
+
+    <div class="container">
+        <div class="file-upload">
+            <label for="csv-file">📁 Select Results CSV File</label>
+            <input type="file" id="csv-file" accept=".csv" />
+        </div>
+
+        <div class="view-toggle" id="view-toggle">
+            <button id="back-button">← Back to List</button>
+        </div>
+
+        <div id="list-view">
+            <h2>Loading...</h2>
+        </div>
+
+        <div id="detail-view">
+            <div class="coding-panel">
+                <h3>📝 Open Coding Notes</h3>
+                <textarea id="coding-notes" placeholder="Assign descriptive labels/notes to identify patterns and potential errors without preconceived categories..."></textarea>
+                <button id="save-button">💾 Save Open Coding</button>
+            </div>
+
+            <div class="trace-panel">
+                <div class="query-section">
+                    <h3>❓ Query</h3>
+                    <div class="query-text" id="query-display"></div>
+                </div>
+
+                <div class="response-section">
+                    <h3>✅ Response</h3>
+                    <div class="response-content" id="response-display"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="success-message" id="success-message">
+        ✓ Open coding saved successfully!
+    </div>
+
+    <script type="py" config='{"packages": ["markdown2"]}'>
+        from pyscript import document, window, when
+        from pyodide.ffi.wrappers import add_event_listener
+        import csv
+        import io
+        import json
+        try:
+            import markdown2
+        except:
+            # Fallback if markdown2 isn't available
+            markdown2 = None
+
+        # Global state
+        data_rows = []
+        current_row = None
+        open_coding_data = {}
+
+        def parse_csv(content):
+            """Parse CSV content into list of dictionaries"""
+            reader = csv.DictReader(io.StringIO(content))
+            rows = []
+            for row in reader:
+                rows.append(row)
+            return rows
+
+        def markdown_to_html(text):
+            """Convert markdown to HTML"""
+            if markdown2:
+                return markdown2.markdown(text, extras=['fenced-code-blocks', 'tables'])
+            else:
+                # Simple fallback: just replace newlines
+                return text.replace('\n', '<br>')
+
+        def show_list_view():
+            """Display the list of all rows"""
+            document.getElementById('list-view').style.display = 'block'
+            document.getElementById('detail-view').style.display = 'none'
+            document.getElementById('view-toggle').style.display = 'none'
+
+        def show_detail_view():
+            """Display the detail view"""
+            document.getElementById('list-view').style.display = 'none'
+            document.getElementById('detail-view').style.display = 'grid'
+            document.getElementById('view-toggle').style.display = 'block'
+
+        def render_list(rows):
+            """Render the list of rows"""
+            global data_rows
+            data_rows = rows
+            
+            list_view = document.getElementById('list-view')
+            
+            if len(rows) == 0:
+                list_view.innerHTML = '<h2>No data available</h2>'
+                return
+            
+            html = '<h2>📋 Query List (' + str(len(rows)) + ' items)</h2>'
+            
+            for i, row in enumerate(rows):
+                row_id = row.get('id', str(i))
+                query = row.get('query', 'No query')
+                # Truncate long queries for display
+                display_query = query[:150] + '...' if len(query) > 150 else query
+                
+                html += f'''
+                <div class="row-item" data-index="{i}">
+                    <span class="row-id">#{row_id}</span>
+                    <span class="row-query">{display_query}</span>
+                </div>
+                '''
+            
+            list_view.innerHTML = html
+            
+            # Add click handlers to all row items
+            items = document.querySelectorAll('.row-item')
+            for item in items:
+                add_event_listener(item, 'click', on_row_click)
+
+        def on_row_click(event):
+            """Handle click on a row item"""
+            global current_row
+            
+            # Find the row-item element (in case clicked on child)
+            target = event.target
+            while target and not target.classList.contains('row-item'):
+                target = target.parentElement
+            
+            if target:
+                index = int(target.getAttribute('data-index'))
+                current_row = data_rows[index]
+                display_detail(current_row)
+
+        def display_detail(row):
+            """Display detail view for a specific row"""
+            row_id = row.get('id', 'unknown')
+            query = row.get('query', 'No query')
+            response = row.get('response', 'No response')
+            
+            # Display query
+            document.getElementById('query-display').innerText = query
+            
+            # Display response as rendered markdown
+            response_html = markdown_to_html(response)
+            document.getElementById('response-display').innerHTML = response_html
+            
+            # Load existing open coding notes if available
+            existing_notes = open_coding_data.get(row_id, '')
+            document.getElementById('coding-notes').value = existing_notes
+            
+            show_detail_view()
+
+        @when('click', '#back-button')
+        def on_back_click(event):
+            """Handle back button click"""
+            show_list_view()
+
+        @when('click', '#save-button')
+        def on_save_click(event):
+            """Handle save button click"""
+            global current_row, open_coding_data
+            
+            if current_row is None:
+                return
+            
+            row_id = current_row.get('id', 'unknown')
+            notes = document.getElementById('coding-notes').value
+            
+            # Store the open coding note
+            open_coding_data[row_id] = notes
+            
+            # Generate CSV content
+            csv_content = 'id,open_coding\n'
+            for rid, note in open_coding_data.items():
+                # Escape quotes in notes
+                escaped_note = note.replace('"', '""')
+                csv_content += f'{rid},"{escaped_note}"\n'
+            
+            # Create download link
+            blob = window.Blob.new([csv_content], {'type': 'text/csv'})
+            url = window.URL.createObjectURL(blob)
+            
+            a = document.createElement('a')
+            a.href = url
+            a.download = 'open_coding.csv'
+            a.click()
+            
+            # Show success message
+            success_msg = document.getElementById('success-message')
+            success_msg.style.display = 'block'
+            window.setTimeout(lambda: success_msg.style.removeProperty('display'), 3000)
+
+        @when('change', '#csv-file')
+        def on_file_change(event):
+            """Handle file upload"""
+            files = event.target.files
+            if files.length == 0:
+                return
+            
+            file = files.item(0)  # Use .item() instead of subscript
+            reader = window.FileReader.new()
+            
+            def on_load(e):
+                content = e.target.result
+                rows = parse_csv(content)
+                render_list(rows)
+            
+            reader.onload = on_load
+            reader.readAsText(file)
+
+        # Initialize
+        document.getElementById('list-view').innerHTML = '<h2 class="loading">📂 Please select a CSV file to begin</h2>'
+    </script>
+</body>
+</html>
+
