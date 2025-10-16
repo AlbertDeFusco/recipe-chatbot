@@ -20,11 +20,11 @@ MODEL_EXTRA_HEADERS: Final[str] = json.loads(os.environ.get("MODEL_EXTRA_HEADERS
 
 
 dimensions = {
-    "number_serving": lambda: choice([2, 6, 8]),
-    "meal": lambda: choice(["breakfast", "lunch", "dinner"]),
-    "dietary_restrictions": lambda: choice(["None", "eggs", "dairy", "gluten"]),
-    "required_ingredients": lambda: choice(["None", "chicken", "beans", "pork", "beef"]),
-    "total_time": lambda: choice([10, 30, 60, 120])
+    "number_serving": lambda: choice([None, 2, 6, 8]),
+    "meal": lambda: choice([None, "breakfast", "lunch", "dinner"]),
+    "dietary_restrictions": lambda: choice([None, "eggs", "dairy", "gluten"]),
+    "required_ingredients": lambda: choice([None, "chicken", "beans", "pork", "beef"]),
+    "total_time": lambda: choice([None, 10, 30, 60, 120])
 }
 
 query_template = dedent("""\
@@ -41,7 +41,7 @@ for _ in tqdm(range(20)):
     for dim, sampler in dimensions.items():
         data[dim] = sampler()
 
-    dims = "\n".join(f" - {k}: {v}" for k, v in data.items())
+    dims = "\n".join(f" - {k}: {v}" for k, v in data.items() if v is not None)
     query = query_template.format(dims=dims)
     completion = litellm.completion(
         model=MODEL_NAME,
