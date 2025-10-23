@@ -190,59 +190,64 @@
             letter-spacing: 0.5px;
         }
 
-        .toggle-container {
+        .review-options {
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 12px;
         }
 
-        .toggle-switch {
-            position: relative;
-            width: 60px;
-            height: 30px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
+        .review-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #dc3545;
-            transition: 0.4s;
-            border-radius: 30px;
+            transition: all 0.3s;
+            background: white;
         }
 
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
+        .review-option:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
         }
 
-        input:checked + .slider {
-            background-color: #28a745;
+        .review-option.selected {
+            border-width: 3px;
         }
 
-        input:checked + .slider:before {
-            transform: translateX(30px);
+        .review-option.unreviewed.selected {
+            border-color: #ffc107;
+            background: #fff3cd;
         }
 
-        .toggle-label {
+        .review-option.passed.selected {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .review-option.failed.selected {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .review-option input[type="radio"] {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .review-option-label {
             font-size: 1rem;
             font-weight: 600;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .review-option-icon {
+            font-size: 1.3rem;
+            margin-left: 8px;
         }
 
         textarea {
@@ -431,13 +436,23 @@
                 <div class="detail-container">
                     <div class="detail-left">
                         <div class="form-group">
-                            <label>Test Result</label>
-                            <div class="toggle-container">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="passed-toggle">
-                                    <span class="slider"></span>
+                            <label>Review Status</label>
+                            <div class="review-options">
+                                <label class="review-option unreviewed" id="option-unreviewed">
+                                    <input type="radio" name="review-status" value="unreviewed">
+                                    <span class="review-option-label">Not Yet Reviewed</span>
+                                    <span class="review-option-icon">⏳</span>
                                 </label>
-                                <span class="toggle-label" id="toggle-label">Failed</span>
+                                <label class="review-option passed" id="option-passed">
+                                    <input type="radio" name="review-status" value="passed">
+                                    <span class="review-option-label">Passed</span>
+                                    <span class="review-option-icon">✅</span>
+                                </label>
+                                <label class="review-option failed" id="option-failed">
+                                    <input type="radio" name="review-status" value="failed">
+                                    <span class="review-option-label">Failed</span>
+                                    <span class="review-option-icon">❌</span>
+                                </label>
                             </div>
                         </div>
                         <div class="form-group">
@@ -610,13 +625,24 @@ def show_detail_view(row_id):
     response_html = markdown2.markdown(response)
     document.getElementById('detail-response').innerHTML = response_html
     
-    # Set passed toggle
-    passed_toggle = document.getElementById('passed-toggle')
+    # Set review status radio buttons
+    # Clear previous selection
+    for option in document.querySelectorAll('.review-option'):
+        option.classList.remove('selected')
+    
+    # Select appropriate radio button
     if passed is None:
-        passed_toggle.checked = False
+        radio = document.querySelector('input[value="unreviewed"]')
+        radio.checked = True
+        document.getElementById('option-unreviewed').classList.add('selected')
+    elif passed == 1:
+        radio = document.querySelector('input[value="passed"]')
+        radio.checked = True
+        document.getElementById('option-passed').classList.add('selected')
     else:
-        passed_toggle.checked = bool(passed)
-    update_toggle_label()
+        radio = document.querySelector('input[value="failed"]')
+        radio.checked = True
+        document.getElementById('option-failed').classList.add('selected')
     
     # Set open coding text
     document.getElementById('open-coding').value = open_coding or ''
@@ -633,17 +659,6 @@ def update_row_data(row_id, passed, open_coding):
         (passed, open_coding, row_id)
     )
     db_conn.commit()
-
-def update_toggle_label():
-    """Update the toggle label based on checkbox state"""
-    toggle = document.getElementById('passed-toggle')
-    label = document.getElementById('toggle-label')
-    if toggle.checked:
-        label.innerText = 'Passed'
-        label.style.color = '#28a745'
-    else:
-        label.innerText = 'Failed'
-        label.style.color = '#dc3545'
 
 def export_to_csv():
     """Export all coded data to CSV file"""
@@ -739,16 +754,33 @@ def handle_back(event):
     document.getElementById('list-view').style.display = 'block'
     render_list_view()
 
-@when('change', '#passed-toggle')
-def handle_passed_change(event):
-    """Handle passed toggle change"""
+@when('change', 'input[name="review-status"]')
+def handle_review_status_change(event):
+    """Handle review status radio button change"""
     if current_row_id is None:
         return
     
-    passed = 1 if event.target.checked else 0
+    # Update visual state
+    for option in document.querySelectorAll('.review-option'):
+        option.classList.remove('selected')
+    
+    # Get selected value
+    selected_value = event.target.value
+    
+    # Convert to database format
+    if selected_value == 'unreviewed':
+        passed = None
+        document.getElementById('option-unreviewed').classList.add('selected')
+    elif selected_value == 'passed':
+        passed = 1
+        document.getElementById('option-passed').classList.add('selected')
+    else:  # failed
+        passed = 0
+        document.getElementById('option-failed').classList.add('selected')
+    
+    # Update database
     open_coding = document.getElementById('open-coding').value
     update_row_data(current_row_id, passed, open_coding)
-    update_toggle_label()
 
 @when('input', '#open-coding')
 def handle_open_coding_change(event):
@@ -757,8 +789,20 @@ def handle_open_coding_change(event):
         return
     
     open_coding = event.target.value
-    passed_toggle = document.getElementById('passed-toggle')
-    passed = 1 if passed_toggle.checked else 0
+    
+    # Get current review status from radio buttons
+    selected_radio = document.querySelector('input[name="review-status"]:checked')
+    if selected_radio:
+        selected_value = selected_radio.value
+        if selected_value == 'unreviewed':
+            passed = None
+        elif selected_value == 'passed':
+            passed = 1
+        else:  # failed
+            passed = 0
+    else:
+        passed = None  # default to unreviewed
+    
     update_row_data(current_row_id, passed, open_coding)
 
 @when('click', '#export-btn')

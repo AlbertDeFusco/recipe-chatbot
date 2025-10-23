@@ -26,7 +26,7 @@ A PyScript-based web application for performing open coding analysis on AI agent
     - Response with markdown formatting below
     - Scrollable content area
   - **Left Panel**:
-    - **Passed Toggle**: Visual switch to mark test as passed/failed
+    - **Review Status Selector**: Three clear options (⏳ Not Yet Reviewed, ✅ Passed, ❌ Failed)
     - **Open Coding Text Area**: Free-text input for:
       - Pattern identification
       - Error categorization
@@ -37,7 +37,7 @@ A PyScript-based web application for performing open coding analysis on AI agent
 ### ⚡ Auto-Save
 - **Real-time Updates**: All changes automatically saved to SQLite database
 - **No Manual Save**: Changes persist immediately upon interaction
-- **Database Sync**: Toggle and text changes instantly update the database
+- **Database Sync**: Review status and text changes instantly update the database
 
 ### 📥 Export Functionality
 - **Export to CSV**: Download all coded data with a single click
@@ -75,7 +75,7 @@ A PyScript-based web application for performing open coding analysis on AI agent
 
 2. **Analyze Each Case**
    - Read the query and response carefully
-   - Toggle "Passed" switch based on your evaluation
+   - Select review status: ⏳ Not Yet Reviewed, ✅ Passed, or ❌ Failed
    - Write observations in the "Open Coding Notes" field:
      - Identify patterns (e.g., "hallucination", "incorrect format")
      - Note error types (e.g., "missing ingredient", "wrong cooking time")
